@@ -1,0 +1,128 @@
+version: '3.8'
+
+services:
+  configserver:
+    image: "movinghouse/configserver"
+    container_name: configserver
+    ports:
+      - "8071:8071"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: "curl --fail --silent localhost:8071/actuator/health/readiness | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    environment:
+      SPRING_RABBITMQ_HOST: "rabbitmq"
+    networks:
+      - movinghousenet
+
+  movinghouse-db:
+    image: mysql:8.0
+    container_name: movinghouse-db
+    environment:
+      MYSQL_ROOT_PASSWORD: 12345
+      MYSQL_DATABASE: movingdb
+    ports:
+      - "3306:3306"
+    volumes:
+      - movinghouse_db_data:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - movinghousenet
+
+  movinghouse-app:
+    build:
+      context: ../transporthouse
+      dockerfile: Dockerfile
+    container_name: movinghouse-app
+    environment:
+      SPRING_CONFIG_IMPORT: "configserver:http://configserver:8071/"
+    ports:
+      - "5000:5000"
+    depends_on:
+      movinghouse-db:
+        condition: service_healthy
+      configserver:
+        condition: service_healthy
+      eurekaserver:
+        condition: service_started
+    networks:
+      - movinghousenet
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: rabbitmq-diagnostics check_port_connectivity
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+    networks:
+      - movinghousenet
+
+  analytics:
+    build:
+      context: ../analytics
+      dockerfile: Dockerfile
+    container_name: analytics
+    ports:
+      - "8080:8080"
+    depends_on:
+      configserver:
+        condition: service_healthy
+    networks:
+      - movinghousenet
+
+  prometheus:
+    image: prom/prometheus:v2.44.0
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ../analytics/monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - movinghousenet
+
+  grafana:
+    image: grafana/grafana:9.5.2
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../analytics/monitoring/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+    networks:
+      - movinghousenet
+
+  eurekaserver:
+    build:
+      context: ../eurekaserver
+      dockerfile: Dockerfile
+    container_name: eurekaserver
+    ports:
+      - "8070:8070"
+    depends_on:
+      configserver:
+        condition: service_healthy
+    environment:
+      SPRING_CONFIG_IMPORT: "configserver:http://configserver:8071/"
+    networks:
+      - movinghousenet
+
+networks:
+  movinghousenet:
+    driver: bridge
+
+volumes:
+  movinghouse_db_data:
