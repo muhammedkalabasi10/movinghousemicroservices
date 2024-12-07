@@ -1,0 +1,10 @@
+2024-11-20 10:09:56,905 INFO o.s.a.r.l.SimpleMessageListenerContainer [SpringApplicationShutdownHook] Waiting for workers to finish.
+2024-11-20 10:09:57,778 INFO o.s.a.r.l.SimpleMessageListenerContainer [SpringApplicationShutdownHook] Successfully waited for workers to finish.
+2024-11-20 10:09:57,779 INFO o.s.c.l.LogAccessor [SpringApplicationShutdownHook] stopped bean 'inbound.springCloudBus.anonymous.k7SKPws6TROV45xwjjETEg'
+2024-11-20 10:09:57,787 INFO o.s.c.l.LogAccessor [SpringApplicationShutdownHook] Channel 'movinghouse.rabbit-348684254.springCloudBusInput.errors' has 1 subscriber(s).
+2024-11-20 10:09:57,831 INFO o.s.c.l.LogAccessor [SpringApplicationShutdownHook] Removing {logging-channel-adapter:_org.springframework.integration.errorLogger} as a subscriber to the 'errorChannel' channel
+2024-11-20 10:09:57,831 INFO o.s.c.l.LogAccessor [SpringApplicationShutdownHook] Channel 'movinghouse.errorChannel' has 0 subscriber(s).
+2024-11-20 10:09:57,832 INFO o.s.c.l.LogAccessor [SpringApplicationShutdownHook] stopped bean '_org.springframework.integration.errorLogger'
+2024-11-20 10:09:57,852 INFO o.s.o.j.AbstractEntityManagerFactoryBean [SpringApplicationShutdownHook] Closing JPA EntityManagerFactory for persistence unit 'default'
+2024-11-20 10:09:57,857 INFO c.z.h.HikariDataSource [SpringApplicationShutdownHook] HikariPool-1 - Shutdown initiated...
+2024-11-20 10:09:57,870 INFO c.z.h.HikariDataSource [SpringApplicationShutdownHook] HikariPool-1 - Shutdown completed.
