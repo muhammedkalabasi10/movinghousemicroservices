@@ -57,6 +57,25 @@ services:
     networks:
       - movinghousenet
 
+  security:
+    build:
+      context: ./security
+      dockerfile: Dockerfile
+    container_name: movinghouse-security
+    environment:
+      SPRING_CONFIG_IMPORT: "configserver:http://configserver:8071/"
+    ports:
+      - "5001:5001"
+    depends_on:
+      movinghouse-db:
+        condition: service_healthy
+      configserver:
+        condition: service_healthy
+      eurekaserver:
+        condition: service_started
+    networks:
+      - movinghousenet
+
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
