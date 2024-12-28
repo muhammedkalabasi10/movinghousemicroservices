@@ -96,11 +96,15 @@ services:
       context: ./analytics
       dockerfile: Dockerfile
     container_name: analytics
+    environment:
+      SPRING_CONFIG_IMPORT: "configserver:http://configserver:8071/"
     ports:
       - "8080:8080"
     depends_on:
       configserver:
         condition: service_healthy
+      eurekaserver:
+        condition: service_started
     networks:
       - movinghousenet
 
@@ -132,6 +136,22 @@ services:
     ports:
       - "8070:8070"
     depends_on:
+      configserver:
+        condition: service_healthy
+    environment:
+      SPRING_CONFIG_IMPORT: "configserver:http://configserver:8071/"
+    networks:
+      - movinghousenet
+  apigateway:
+    build:
+      context: ./apigateway
+      dockerfile: Dockerfile
+    container_name: apigateway
+    ports:
+      - "8072:8072"
+    depends_on:
+      eurekaserver:
+        condition: service_started
       configserver:
         condition: service_healthy
     environment:
